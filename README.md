@@ -1,5 +1,6 @@
 # acgs-haystack
 
+[![CI](https://github.com/acgs-ai/acgs-haystack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/acgs-ai/acgs-haystack/actions/workflows/ci.yml)
 [![PyPI - Version](https://img.shields.io/pypi/v/acgs-haystack.svg)](https://pypi.org/project/acgs-haystack)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/acgs-haystack.svg)](https://pypi.org/project/acgs-haystack)
 
