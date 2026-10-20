@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "acgs-haystack"
-version = "0.1.0"
+version = "0.1.1"
 description = "ACGS rule-based tool-call governance for the Haystack Agent before_tool hook"
 readme = "README.md"
 requires-python = ">=3.11"
