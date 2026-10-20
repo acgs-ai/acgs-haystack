@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+  # Lint, format and type checks run through hatch so that pre-commit and CI use the same tool versions.
+  - repo: local
+    hooks:
+      - id: fmt-check
+        name: ruff lint + format check (hatch run fmt-check)
+        entry: hatch run fmt-check
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: types
+        name: mypy --strict (hatch run test:types)
+        entry: hatch run test:types
+        language: system
+        pass_filenames: false
+        types: [python]

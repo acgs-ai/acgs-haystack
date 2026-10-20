@@ -1,0 +1,115 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "acgs-haystack"
+version = "0.1.0"
+description = "ACGS rule-based tool-call governance for the Haystack Agent before_tool hook"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["haystack", "agents", "governance", "acgs", "tool-calling", "human-in-the-loop"]
+authors = [{ name = "Martin Lyu" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Typing :: Typed",
+]
+dependencies = ["haystack-ai>=3.0.0", "acgs-lite>=3.0.1,<4"]
+
+[project.urls]
+Documentation = "https://github.com/acgs-ai/acgs-haystack#readme"
+Issues = "https://github.com/acgs-ai/acgs-haystack/issues"
+Source = "https://github.com/acgs-ai/acgs-haystack"
+Changelog = "https://github.com/acgs-ai/acgs-haystack/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/haystack_integrations"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "examples", "README.md", "CHANGELOG.md", "LICENSE", "pyproject.toml"]
+
+[tool.hatch.envs.default]
+installer = "uv"
+dependencies = ["ruff"]
+
+[tool.hatch.envs.default.scripts]
+fmt = "ruff check --fix {args}; ruff format {args}"
+fmt-check = "ruff check {args} && ruff format --check {args}"
+
+[tool.hatch.envs.test]
+installer = "uv"
+dependencies = ["pytest", "pytest-asyncio", "pytest-cov", "mypy", "pip"]
+
+[tool.hatch.envs.test.scripts]
+unit = 'pytest -m "not integration" {args:tests src}'
+integration = 'pytest -m "integration" {args:tests src}'
+all = 'pytest {args:tests src}'
+cov = 'pytest --cov=haystack_integrations --cov-report=term-missing --cov-fail-under=95 {args:tests src}'
+types = "mypy -p haystack_integrations.hooks.acgs {args}"
+
+# Run the suite against the oldest supported versions of haystack-ai and acgs-lite.
+[tool.hatch.envs.test-min]
+template = "test"
+python = "3.11"
+extra-dependencies = ["haystack-ai==3.0.0", "acgs-lite==3.0.1"]
+
+[tool.mypy]
+strict = true
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["lazy_imports.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+  "A", "ANN", "ARG", "B", "C", "D102", "D103", "D205", "D209", "D213", "D417", "D419", "DTZ", "E", "EM",
+  "F", "I", "ICN", "ISC", "N", "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "T", "TID", "UP", "W", "YTT",
+]
+ignore = [
+  "B027", "S105", "S106", "S107", "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR0917", "S101",
+  "ANN401",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["haystack_integrations"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = ["D", "PLR2004", "S101", "TID252", "ANN", "ARG"]
+"examples/**" = ["T201", "ANN", "D", "ARG"]
+
+[tool.coverage.run]
+source = ["haystack_integrations"]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+omit = ["*/tests/*"]
+show_missing = true
+exclude_lines = ["no cov", "pragma: no cover", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --doctest-modules --import-mode=importlib"
+testpaths = ["tests", "src"]
+markers = ["integration: tests that need external services or API keys (there are none at present)"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+log_cli = false
