@@ -161,6 +161,15 @@ class TestFailClosed:
         strategy = ACGSConfirmationStrategy(constitution=CONSTITUTION, review_strategy=RaisingStrategy())  # type: ignore[arg-type]
         assert _run(strategy, {"action": "refund and delete everything"}).execute is False
 
+    def test_mixed_match_feedback_names_only_the_blocking_rule_as_blocking(self) -> None:
+        # Regression (0.1.0): the review rule was listed under "Blocked by" next to the blocking rule.
+        decision = _run(ACGSConfirmationStrategy(constitution=CONSTITUTION), {"action": "refund and delete everything"})
+        assert decision.execute is False
+        assert decision.feedback == (
+            "Tool call 'payments' was not executed. Blocked by ACGS rule T-BLOCK (no deletes). "
+            "Review rules that also matched: ACGS rule T-REVIEW (refunds need review)."
+        )
+
 
 class TestAsync:
     async def test_allow_and_deny(self) -> None:

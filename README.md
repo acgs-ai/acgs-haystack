@@ -145,6 +145,8 @@ not checked by an ACGS strategy registered under `"*"`.
    | Any exception while formatting, validating, or reviewing | reject (fail-closed) |
 
    A matched blocking rule is never downgraded to review because a review rule matched as well.
+   The denial reason then lists only the blocking rules after "Blocked by" and names the matched review
+   rules separately.
 
 `ACGSConfirmationStrategy.evaluate(tool_name, params)` returns the underlying `GovernanceDecision`
 (`verdict`, `reason`, `rule_ids`, `warning_rule_ids`, `error`) without running anything.
