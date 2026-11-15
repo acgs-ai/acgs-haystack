@@ -5,9 +5,13 @@
 
 from __future__ import annotations
 
+import json
+import os
 import runpy
+import socket
 import textwrap
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -27,6 +31,35 @@ def test_quickstart_example_runs(capsys: pytest.CaptureFixture[str]) -> None:
     assert "get_weather: ran: Sunny in Paris" in out
     assert "send_email: rejected:" in out
     assert "ACGS-006" in out
+
+
+def test_deny_and_audit_runs_offline_without_api_keys(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    for key in list(os.environ):
+        if key.endswith("API_KEY"):
+            monkeypatch.delenv(key)
+    # Register the example's environment change so monkeypatch restores the original value.
+    monkeypatch.setenv("HAYSTACK_TELEMETRY_ENABLED", "False")
+
+    def no_network(*args: Any, **kwargs: Any) -> None:
+        pytest.fail("The offline example attempted a network connection")
+
+    monkeypatch.setattr(socket.socket, "connect", no_network)
+    monkeypatch.setattr(socket.socket, "connect_ex", no_network)
+    monkeypatch.setattr(socket, "create_connection", no_network)
+    runpy.run_path(str(ROOT / "examples" / "deny_and_audit.py"), run_name="__main__")
+    output = capsys.readouterr().out
+    execution, audit = output.split("Audit trail (application decisions):\n")
+    assert execution == "Executed record_note: The meeting starts at noon.\n"
+    decisions = [json.loads(line) for line in audit.splitlines()]
+    assert [decision["verdict"] for decision in decisions] == ["allow", "deny"]
+    assert [decision["tool_name"] for decision in decisions] == ["record_note", "record_note"]
+    assert decisions[0]["rule_ids"] == []
+    assert decisions[1]["rule_ids"] == ["ACGS-006"]
+    assert "Blocked by" in decisions[1]["reason"]
+    assert all(decision["error"] is None for decision in decisions)
+    assert "demo-secret" not in output
 
 
 def _python_blocks(markdown: str) -> list[str]:
