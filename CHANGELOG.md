@@ -6,6 +6,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## 0.2.0 (unreleased)
+
+### Added
+
+- Offline `examples/deny_and_audit.py`: one allowed and one denied Haystack tool call, with an application
+  decision trail.
+- Compatibility coverage for nested JSON-native arguments and bytes/bytearray formatting with acgs-lite 4.0.0.
+
+### Changed
+
+- Document the compatibility matrix: the default/test Hatch environments resolve acgs-lite 4.0.0, and the CI
+  `test-min` job tests the 3.0.1 floor. Runtime support remains `acgs-lite>=3.0.1,<5`.
+- Clarify that the adapter validates formatted text and does not issue signed receipts.
+
 ## [0.1.1] - 2026-10-20
 
 ### Fixed
